@@ -365,7 +365,12 @@ func (ac *ALBController) GetNodes() util.AWSStringSlice {
 		if _, ok := n.ObjectMeta.Labels["node-role.kubernetes.io/master"]; ok {
 			continue
 		}
-		result = append(result, aws.String(n.Spec.ExternalID))
+		if strings.Contains(n.Spec.ProviderID, "aws") {
+			s := strings.Replace(n.Spec.ProviderID, "/", "", -1)
+			result = append(result, aws.String(strings.SplitN(s, ":", 2)[1]))
+		} else {
+			result = append(result, aws.String(n.Spec.ExternalID))
+		}
 	}
 	sort.Sort(result)
 	return result
